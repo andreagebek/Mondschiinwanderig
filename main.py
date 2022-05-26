@@ -291,9 +291,9 @@ def traceRays(moonCoords, args):
     return block
 
 
-def createMovie(blockList, mapImage, mapGrid, mapExtent, timeList):
+def createMovie(blockList, mapImage, mapGrid, mapExtent, timeList, pathFigure):
 
-    fig = plt.figure(figsize = (12, 8))
+    fig = plt.figure(figsize = (30, 20))
     ax = fig.add_subplot(111)
 
     ims = []
@@ -315,8 +315,8 @@ def createMovie(blockList, mapImage, mapGrid, mapExtent, timeList):
         ims.append([im, title])
 
     ani = animation.ArtistAnimation(fig, ims, interval = 200, blit = True, repeat_delay = 1000)
-    writervideo = animation.FFMpegWriter(fps=1)
-    ani.save('/Users/agebek/Downloads/moon.mp4', writer = writervideo)
+    writervideo = animation.FFMpegWriter(fps=1, bitrate = 5000)
+    ani.save(pathFigure, writer = writervideo)
 
     return 0
 
@@ -328,24 +328,26 @@ if __name__ == '__main__':
 
     # Input parameters
 
-    x_center = 2626000 # x-coordinate of the center of the hiking region in the Swiss coordinate system
-    y_center = 1174000 # y-coordinate of the center of the hiking region in the Swiss coordinate system
+    x_center = 2631500 # x-coordinate of the center of the hiking region in the Swiss coordinate system
+    y_center = 1176000 # y-coordinate of the center of the hiking region in the Swiss coordinate system
 
-    deltaHike_x = 6. # Extent of the hiking region in x-direction (in km)
-    deltaHike_y = 6. # Extent of the hiking region in y-direction (in km)
+    deltaHike_x = 3. # Extent of the hiking region in x-direction (in km)
+    deltaHike_y = 2. # Extent of the hiking region in y-direction (in km)
 
-    deltaRaytracing_x = 6. # Extent of the region taken into account for the raytracing in x-direction (in km)
-    deltaRaytracing_y = 6. # Extent of the region taken into account for the raytracing in y-direction (in km)
+    deltaRaytracing_x = 10. # Extent of the region taken into account for the raytracing in x-direction (in km)
+    deltaRaytracing_y = 10. # Extent of the region taken into account for the raytracing in y-direction (in km)
     raytracingResolution = 0.025 # Resolution of the raytracing in km
 
-    startDate = '2022.01.17'
-    startHour = 20
-    startMin = 30
+    startDate = '2022.06.11' # yyyy.mm.dd
+    startHour = 21
+    startMin = 15
 
-    endHour = 22
+    endHour = 25
     endMin = 30
 
     timeResolution = 10 # In minutes
+
+    pathFigure = '/Users/agebek/Downloads/mondHabkern.mp4'
 
 
 
@@ -360,16 +362,17 @@ if __name__ == '__main__':
 
     # Get the 3D-data and maps for the selected location from swisstopo
 
+
+    mapImage, mapExtent, mapGrid = getMaps(x_center, y_center, deltaHike_x, deltaHike_y)
+
+    print('Time elapsed for map download:', datetime.datetime.now() - startTime)
+
+
+
     coarseGrid, altitudes = get3Ddata(x_center, y_center, deltaRaytracing_x, deltaRaytracing_y, raytracingResolution)
 
     print('Time elapsed for 3D data download:', datetime.datetime.now() - startTime)
 
-
-
-    mapImage, mapExtent, mapGrid = getMaps(x_center, y_center, deltaHike_x, deltaHike_y)
-
-
-    print('Time elapsed for map download:', datetime.datetime.now() - startTime)
 
 
     moonCoords = np.column_stack((azimuthList, elevationList))
@@ -389,6 +392,6 @@ if __name__ == '__main__':
 
     print('Time elapsed for raytracing:', datetime.datetime.now() - startTime)
 
-    createMovie(blockList, mapImage, mapGrid, mapExtent, timeList)
+    createMovie(blockList, mapImage, mapGrid, mapExtent, timeList, pathFigure)
 
     print('Execution time for the script:', datetime.datetime.now() - startTime)
